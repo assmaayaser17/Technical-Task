@@ -20,8 +20,14 @@ export const authService = {
       body: JSON.stringify(data),
     }),
 
-  verify: (data: VerifyRequest) =>
-    apiClient<ApiResponse<AuthUser>>('/auth/verify', {
+  verifyEmail: (data: VerifyRequest) =>
+    apiClient<ApiResponse<AuthUser>>('/auth/verify-email', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  resendVerificationCode: (data: { email: string }) =>
+    apiClient<ApiResponse<unknown>>('/auth/verify-email/resend-code', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
