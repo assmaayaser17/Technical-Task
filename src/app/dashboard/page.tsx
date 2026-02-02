@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/context/AuthContext';
 
@@ -65,6 +66,12 @@ export default function DashboardPage() {
           <p className="mt-2 text-gray-600">
             You have successfully signed in to your dashboard.
           </p>
+          <Link
+            href="/products/1"
+            className="mt-4 inline-block text-sm font-medium text-blue-600 hover:text-blue-700"
+          >
+            View Product Details →
+          </Link>
         </div>
       </main>
     </div>
