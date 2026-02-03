@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import { AuthLayout } from "@/features/auth/components/auth-layout";
 

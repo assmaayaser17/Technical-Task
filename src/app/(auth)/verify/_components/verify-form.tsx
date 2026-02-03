@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,15 +21,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+
 const TEST_VERIFICATION_CODE = "123456";
 
-function VerifyContent() {
+export default function VerifyContent() {
+  // States
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isResending, setIsResending] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // React hook form
   const form = useForm<VerifyFormData>({
     resolver: zodResolver(verifySchema),
     defaultValues: {
@@ -38,11 +41,13 @@ function VerifyContent() {
     },
   });
 
+  // Use effect
   useEffect(() => {
     const emailParam = searchParams.get("email");
     if (emailParam) form.setValue("email", emailParam);
   }, [searchParams, form]);
 
+  // Verify onsubmit function
   const onSubmit = async (data: VerifyFormData) => {
     setError("");
     setSuccessMessage("");
@@ -52,9 +57,14 @@ function VerifyContent() {
         code: data.code,
       });
       if (response.status) {
-        setSuccessMessage(response.message || "Account verified! Redirecting to login...");
+        setSuccessMessage(
+          response.message || "Account verified! Redirecting to login...",
+        );
         const email = data.email;
-        setTimeout(() => router.push(`/login?email=${encodeURIComponent(email)}`), 1500);
+        setTimeout(
+          () => router.push(`/login?email=${encodeURIComponent(email)}`),
+          1500,
+        );
       } else {
         setError(response.message || "Invalid verification code");
       }
@@ -63,6 +73,7 @@ function VerifyContent() {
     }
   };
 
+  // Handel resend code
   const handleResendCode = async () => {
     const email = form.getValues("email");
     if (!email) {
@@ -75,13 +86,19 @@ function VerifyContent() {
     try {
       const response = await authService.resendVerificationCode({ email });
       if (response.status) {
-        setSuccessMessage(response.message || "Verification code sent! Check your email.");
+        setSuccessMessage(
+          response.message || "Verification code sent! Check your email.",
+        );
       } else {
         setError(response.message || "Failed to resend code");
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to resend code";
-      if (message.toLowerCase().includes("unauthenticated") || message.toLowerCase().includes("401")) {
+      const message =
+        err instanceof Error ? err.message : "Failed to resend code";
+      if (
+        message.toLowerCase().includes("unauthenticated") ||
+        message.toLowerCase().includes("401")
+      ) {
         setError("Session expired. Please register or login again.");
       } else {
         setError(message);
@@ -94,14 +111,19 @@ function VerifyContent() {
   return (
     <AuthLayout>
       <div className="w-full max-w-md">
+        {/* Layout */}
         <div className="rounded-2xl bg-white p-8 shadow-lg">
+          {/* Title */}
           <h2 className="mb-1 text-2xl font-bold text-gray-900">
             Verify your account
           </h2>
+
+          {/* Description */}
           <p className="mb-6 text-gray-600">
             Enter the verification code sent to your email
           </p>
 
+          {/* Form content */}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
               {error && (
@@ -115,6 +137,7 @@ function VerifyContent() {
                 </div>
               )}
 
+              {/* Email feild */}
               <FormField
                 control={form.control}
                 name="email"
@@ -133,6 +156,7 @@ function VerifyContent() {
                 )}
               />
 
+              {/* Codefeild */}
               <FormField
                 control={form.control}
                 name="code"
@@ -160,6 +184,7 @@ function VerifyContent() {
                 )}
               />
 
+              {/* Verify button */}
               <Button
                 type="submit"
                 disabled={form.formState.isSubmitting}
@@ -170,6 +195,7 @@ function VerifyContent() {
                   : "Verify Account"}
               </Button>
 
+              {/* Resend code */}
               <div className="text-center">
                 <button
                   type="button"
@@ -183,6 +209,7 @@ function VerifyContent() {
             </form>
           </Form>
 
+          {/* Login link */}
           <p className="mt-6 text-center text-sm text-gray-600">
             Already verified?{" "}
             <Link
@@ -195,27 +222,5 @@ function VerifyContent() {
         </div>
       </div>
     </AuthLayout>
-  );
-}
-
-export default function VerifyPage() {
-  return (
-    <Suspense
-      fallback={
-        <AuthLayout>
-          <div className="w-full max-w-md">
-            <div className="rounded-2xl bg-white p-8 shadow-lg">
-              <div className="animate-pulse space-y-4">
-                <div className="h-8 w-48 rounded bg-gray-200" />
-                <div className="h-4 w-full rounded bg-gray-200" />
-                <div className="h-12 w-full rounded bg-gray-200" />
-              </div>
-            </div>
-          </div>
-        </AuthLayout>
-      }
-    >
-      <VerifyContent />
-    </Suspense>
   );
 }

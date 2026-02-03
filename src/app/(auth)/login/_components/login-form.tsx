@@ -1,17 +1,5 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { AuthLayout } from "@/features/auth/components/auth-layout";
-import { useAuth } from "@/features/auth/context/AuthContext";
-import { authService } from "@/shared/services/auth.service";
-import {
-  loginSchema,
-  type LoginFormData,
-} from "@/shared/validations/auth.schemas";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -22,14 +10,25 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { AuthLayout } from "@/features/auth/components/auth-layout";
+import { useAuth } from "@/features/auth/context/auth-context";
+import { authService } from "@/shared/services/auth.service";
+import { LoginFormData, loginSchema } from "@/shared/validations/auth.schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 
-function LoginContent() {
+export default function LoginForm() {
+  // States
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const { login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // React hook form
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -38,11 +37,13 @@ function LoginContent() {
     },
   });
 
+  // Use effect
   useEffect(() => {
     const emailParam = searchParams.get("email");
     if (emailParam) form.setValue("email", emailParam);
   }, [searchParams, form]);
 
+  // Login on submit function
   const onSubmit = async (data: LoginFormData) => {
     setError("");
     try {
@@ -63,13 +64,20 @@ function LoginContent() {
 
   return (
     <AuthLayout>
+      {/* Layout */}
       <div className="w-full max-w-md">
         <div className="rounded-2xl bg-white p-8 shadow-lg">
+          {/* Title */}
           <h2 className="mb-1 text-2xl font-bold text-gray-900">
             Welcome back
           </h2>
-          <p className="mb-6 text-[#A08268]">Sign in to access your dashboard</p>
 
+          {/* Description */}
+          <p className="mb-6 text-[#A08268]">
+            Sign in to access your dashboard
+          </p>
+
+          {/* Form content */}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
               {error && (
@@ -78,6 +86,7 @@ function LoginContent() {
                 </div>
               )}
 
+              {/* Email field */}
               <FormField
                 control={form.control}
                 name="email"
@@ -96,6 +105,7 @@ function LoginContent() {
                 )}
               />
 
+              {/* Password */}
               <FormField
                 control={form.control}
                 name="password"
@@ -114,6 +124,7 @@ function LoginContent() {
                 )}
               />
 
+              {/* Forgot password */}
               <div className="flex items-center justify-between">
                 <label className="flex cursor-pointer items-center gap-2">
                   <input
@@ -132,6 +143,7 @@ function LoginContent() {
                 </Link>
               </div>
 
+              {/* On submit */}
               <Button
                 type="submit"
                 disabled={form.formState.isSubmitting}
@@ -142,6 +154,7 @@ function LoginContent() {
             </form>
           </Form>
 
+          {/* Verifying email */}
           <p className="mt-6 text-center text-sm text-gray-600">
             Need to verify your email?{" "}
             <Link
@@ -151,6 +164,8 @@ function LoginContent() {
               Verify account
             </Link>
           </p>
+
+          {/* Register link */}
           <p className="mt-2 text-center text-sm text-gray-600">
             Don&apos;t have an account?{" "}
             <Link
@@ -163,27 +178,5 @@ function LoginContent() {
         </div>
       </div>
     </AuthLayout>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense
-      fallback={
-        <AuthLayout>
-          <div className="w-full max-w-md">
-            <div className="rounded-2xl bg-white p-8 shadow-lg">
-              <div className="animate-pulse space-y-4">
-                <div className="h-8 w-48 rounded bg-gray-200" />
-                <div className="h-4 w-full rounded bg-gray-200" />
-                <div className="h-12 w-full rounded bg-gray-200" />
-              </div>
-            </div>
-          </div>
-        </AuthLayout>
-      }
-    >
-      <LoginContent />
-    </Suspense>
   );
 }
